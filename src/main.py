@@ -15,6 +15,7 @@ def main():
     balls.append(Ball(100, 50, 25, (0,255,0)))
     balls.append(Ball(50, 100, 20, (255,0,0), velocity=20))
     balls.append(Ball(150, 150, 20, (255,0,0), velocity=30))
+    balls.append(Ball(300, 150, 20, (0,0,255), velocity=10, angle=140))
 
     run = True
     while run:
@@ -26,10 +27,10 @@ def main():
         screen.fill((255,255,255))
 
         for i in range(0, len(balls)):
-            balls[i].handle_border_collision(*screen.get_size())
             for j in range(i + 1, len(balls)):
                  if balls[i].collides(balls[j]):
-                     balls[i].handle_balls_collision(balls[j])
+                    balls[i].handle_balls_collision(balls[j])
+            balls[i].update(*screen.get_size())
             balls[i].draw(screen)
             balls[i].draw_vec(screen, size=3)
 

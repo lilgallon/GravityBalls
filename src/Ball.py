@@ -7,7 +7,7 @@ class Ball:
     DENSITY = 0.001
     GRAVITY = 1.81
     # Impact velocity reducer (%)
-    IMPACT_REDUCER = 0.20
+    IMPACT_REDUCER = 0.15
 
     def __init__(self, x, y, radius, color, velocity=0, angle=0):
         """
@@ -44,7 +44,7 @@ class Ball:
                int(self.position[1] + self.velocity[1] * size))
         pygame.draw.line(screen, (0, 0, 0), start, end)
 
-    def handle_border_collision(self, screen_width, screen_height):
+    def update(self, screen_width, screen_height):
         """ It updates the ball position.
         """
         # Get the screen dimensions
@@ -77,29 +77,17 @@ class Ball:
     def handle_balls_collision(self, ball):
         # Two-dimensional collision with two moving objects
         # https://en.wikipedia.org/wiki/Elastic_collision
-        # https://gamedev.stackexchange.com/questions/70119/do-two-balls-of-different-mass-bounce-different-heights
-        # a -> current ball
-        # b -> other ball
-        # i -> initial, f -> final
+        collision = self.position - ball.get_position()
+        distance = collision.get_length()
 
-        a_mass = self.get_mass()
-        b_mass = ball.get_mass()
-        a_iv = self.velocity.get_length()
-        b_iv = ball.get_velocity().get_length()
+        collision = collision / distance
+        aci = self.velocity.dot(collision)
+        bci = ball.get_velocity().dot(collision)
+        acf = bci
+        bcf = aci
 
-        # We calculate the velocity
-        a_fv = ((a_mass - b_mass) / (a_mass + b_mass) * a_iv +
-                (2. * b_mass) / (a_mass + b_mass) * b_iv)
-        b_fv = ((2. * a_mass) / (a_mass + b_mass) * a_iv +
-                (b_mass - a_mass) / (a_mass + b_mass) * b_iv)
-
-        # We calculate the angle
-        # TODO
-        a_angle = 0
-        b_angle = 0
-
-        # We put it in a vector
-        # TODO
+        self.velocity += (acf - aci) * collision
+        ball.set_velocity(ball.get_velocity() + (bcf - bci) * collision)
 
     def get_mass(self):
         """ It returns the mass of the ball.
@@ -109,7 +97,10 @@ class Ball:
 
     def get_velocity(self):
         return self.velocity
-    
+
+    def get_position(self):
+        return self.position
+
     def set_velocity(self, velocity):
         self.velocity = velocity
 
@@ -123,10 +114,13 @@ class Ball:
         """
         return deg * math.pi / 180
 
+    def get_radius(self):
+        return self.radius
+
     def collides(self, ball):
         """ Returns true if the current ball collides the <ball>
         """
-        distance = self.position.get_distance(ball.position)
-        return distance <= self.radius + ball.radius
+        distance = self.position.get_distance(ball.get_position())
+        return distance <= self.radius + ball.get_radius()
 
 # some help : https://en.wikipedia.org/wiki/Elastic_collision
