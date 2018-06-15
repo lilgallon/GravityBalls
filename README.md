@@ -5,6 +5,6 @@ A funny small project that consists in animating balls with gravity and in handl
 - [x] Basic gravity
 - [x] Collision between balls
 - [x] Move any the ball with mouse
-- [ ] Line behind the balls
-- [ ] Balls moving when moving the window
+- [x] Line behind the balls
+- [ ] ! Improve collision
 - [ ] Automatic velocity reducer according to friction

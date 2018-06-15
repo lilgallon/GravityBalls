@@ -61,8 +61,7 @@ def main():
             balls[i].draw_vec(screen, size=3)
             balls[i].draw_tracker(screen)
 
-        # pygame.display.flip()
-        pygame.display.update()
+        pygame.display.flip()
         time.sleep(0.05)
 
 
