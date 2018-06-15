@@ -27,6 +27,7 @@ class Ball:
         self.position = Vector2(x, y)
         self.radius = radius
         self.color = color
+        self.is_clicked = False
 
     def draw(self, screen):
         """ It draws the ball on the pygame screen.
@@ -50,7 +51,8 @@ class Ball:
         # Get the screen dimensions
         width, height = screen_width, screen_height
         # Apply gravity
-        self.velocity += self.get_gravity_vector()
+        if not self.is_clicked:
+            self.velocity += self.get_gravity_vector()
         # Move the ball
         self.position += self.velocity
         # It has hit the right border
@@ -100,6 +102,9 @@ class Ball:
 
     def get_position(self):
         return self.position
+    
+    def set_position(self, pos):
+        self.position = Vector2(pos[0], pos[1])
 
     def set_velocity(self, velocity):
         self.velocity = velocity
@@ -122,5 +127,17 @@ class Ball:
         """
         distance = self.position.get_distance(ball.get_position())
         return distance <= self.radius + ball.get_radius()
+
+    def hover(self, pos):
+        return (pos[0] < self.position[0] + self.radius and
+                pos[0] > self.position[0] - self.radius and
+                pos[1] < self.position[1] + self.radius and
+                pos[1] > self.position[1] - self.radius)
+
+    def clicked(self, is_clicked):
+        self.is_clicked = is_clicked
+        if is_clicked:
+            self.velocity = Vector2(0, 0)
+
 
 # some help : https://en.wikipedia.org/wiki/Elastic_collision
