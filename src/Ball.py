@@ -1,96 +1,90 @@
 import pygame
+from pygame.math import Vector2
 import math
 
 class Ball:
-    def __init__(self, x, y, velocity, angle, radius, color):
-        """[summary]
-        
-        Arguments:
-            x {[type]} -- [description]
-            y {[type]} -- [description]
-            velocity {[type]} -- pixel / tick
-            radius {[type]} -- [description]
-            color {[type]} -- [description]
+    # Density of a ball ()
+    DENSITY = 0.001
+    GRAVITY = 9.81
+    # Impact velocity reducer (%)
+    IMPACT_REDUCER = 0.20
+
+    def __init__(self, x, y, radius, color, velocity=0, angle=0):
         """
-        # - because axis are inverted
-        self.vx = - math.cos(self.deg_to_grad(angle)) * velocity
-        self.vy = - math.sin(self.deg_to_grad(angle)) * velocity
-        self.x = x
-        self.y = y
-        self.angle = angle
+        Arguments:
+            x {int} -- x initial position
+            y {int} -- y initial position
+            radius {int} -- radius of the ball
+            color {tuple3} -- color of the ball
+
+        Keyword Arguments:
+            velocity {int} -- initial velocity (default: {0})
+            angle {int} -- initial angle (degrees) (default: {0})
+        """
+        # Convert the initial angle & velocity to a velocity vector
+        self.velocity = Vector2(- math.cos(self.deg_to_grad(angle)) * velocity,
+                               - math.sin(self.deg_to_grad(angle)) * velocity)
+        self.position = Vector2(x, y)
         self.radius = radius
         self.color = color
-        self.gravity = 9
-        self.impact_reducer = 20  # %
 
-    def update(self, screen, balls):
-        width, height = screen.get_size()
+    def draw(self, screen):
+        """ It draws the ball on the pygame screen.
+        """
+        pygame.draw.circle(screen,
+                           self.color,
+                           (int(self.position[0]), int(self.position[1])),
+                           self.radius)
 
-        self.vy += self.gravity
+    def update(self, screen_width, screen_height):
+        """ It updates the ball position.
+        """
+        print(self.position)
+        # Get the screen dimensions
+        width, height = screen_width, screen_height
 
-        self.x += self.vx
-        self.y += self.vy
+        # Apply gravity
+        self.velocity += self.get_gravity_vector()
 
-        for ball in balls:
-            if self.collide(ball):
-                if self == ball:
-                    continue
-                print('x: ' + str(self.x) + ' ' + str(ball.get_pos()[0]))
-                print('y: ' + str(self.y) + ' ' + str(ball.get_pos()[1]))
-                # line that pass through the two balls
-                a = (ball.y - self.y) / (ball.x - self.x)
-                b = self.y - a * self.x
-                # distance between the two balls
-                # dist = math.sqrt((self.x - ball.x)**2 + (self.y - ball.y)**2)
-                self.x += a
-                self.y += b
-                print('a ' + str(a))
-                print(b)
-                if b >= 0:
-                    self.vx *= -1
-                    self.friction(self.impact_reducer)
-                elif b < 0:
-                    self.vy *= -1
-                    self.friction(self.impact_reducer)
+        # Move the ball
+        self.position += self.velocity
 
-        if self.x + self.radius > width:
-            self.vx *= -1
-            self.x = width - self.radius
-            self.friction(self.impact_reducer)
-        elif self.x - self.radius < 0:
-            self.vx *= -1
-            self.x = self.radius
-            self.friction(self.impact_reducer)
+        # It has hit the right border
+        if self.position[0] + self.radius > width:
+            self.velocity[0] *= -1
+            self.position[0] = width - self.radius
+            self.velocity -= self.velocity * self.IMPACT_REDUCER
+        # It has hit the left border
+        elif self.position[0] - self.radius < 0:
+            self.velocity[0] *= -1
+            self.position[0] = self.radius
+            self.velocity -= self.velocity * self.IMPACT_REDUCER
+        # It has hit the top border
+        if self.position[1] + self.radius > height:
+            self.velocity[1] *= -1
+            self.position[1] = height - self.radius
+            self.velocity -= self.velocity * self.IMPACT_REDUCER
+        # It has hit the bottom border
+        elif self.position[1] - self.radius < 0:
+            self.velocity[1] *= -1
+            self.position[1] = self.radius
+            self.velocity -= self.velocity * self.IMPACT_REDUCER
 
-        if self.y + self.radius > height:
-            self.vy *= -1
-            self.y = height - self.radius
-            self.friction(self.impact_reducer)
-        elif self.y - self.radius < 0:
-            self.vy *= -1
-            self.y = self.radius
-            self.friction(self.impact_reducer)
+    def get_gravity_vector(self):
+        """ It returns the gravity vector of a ball according to its mass.
+        """
+        area = math.pi * self.radius * self.radius
+        mass = area * self.DENSITY
 
-        self.x = int(self.x)
-        self.y = int(self.y)
-
-        pygame.draw.circle(screen, self.color, (self.x, self.y), self.radius)
+        return Vector2(0, mass * self.GRAVITY)
 
     def deg_to_grad(self, deg):
+        """ Convert degrees to radian.
+        """
         return deg * math.pi / 180
 
-    def friction(self, percentage):
-        self.vx -= self.vx * percentage / 100
-        self.vy -= self.vy * percentage / 100
-
-    def get_vecs(self):
-        return (self.vx, self.vy)
-
-    def get_pos(self):
-        return (self.x, self.y)
-
-    def collide(self, ball):
-        return (math.sqrt((self.x - ball.x)**2 + (self.y - ball.y)**2) <=
-                self.radius + ball.radius)
+    # def collides(self, ball):
+    #     return (math.sqrt((self.x - ball.x)**2 + (self.position[1] - ball.y)**2) <=
+    #             self.radius + ball.radius)
 
 # some help : https://stackoverflow.com/questions/345838/ball-to-ball-collision-detection-and-handling
