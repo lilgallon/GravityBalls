@@ -1,4 +1,5 @@
 import pygame
+import copy
 import math
 from utils.Vec2D import Vec2d as Vector2
 
@@ -8,6 +9,8 @@ class Ball:
     GRAVITY = 1.81
     # Impact velocity reducer (%)
     IMPACT_REDUCER = 0.15
+    # MAX TRACK
+    MAX_POINTS_TO_TRACK = 40
 
     def __init__(self, x, y, radius, color, velocity=0, angle=0):
         """
@@ -28,6 +31,7 @@ class Ball:
         self.radius = radius
         self.color = color
         self.is_clicked = False
+        self.tracker = []
 
     def draw(self, screen):
         """ It draws the ball on the pygame screen.
@@ -36,6 +40,13 @@ class Ball:
                            self.color,
                            (int(self.position[0]), int(self.position[1])),
                            self.radius)
+
+    def draw_tracker(self, screen):
+        for point in self.tracker:
+            pygame.draw.circle(screen,
+                               self.color,
+                               (int(point[0]), int(point[1])),
+                               1)
 
     def draw_vec(self, screen, size=1):
         """ It draws the velocity vector.
@@ -53,8 +64,9 @@ class Ball:
         # Apply gravity
         if not self.is_clicked:
             self.velocity += self.get_gravity_vector()
-        # Move the ball
-        self.position += self.velocity
+            # Move the ball
+            self.position += self.velocity
+        self.update_tracker()
         # It has hit the right border
         if self.position[0] + self.radius > width:
             self.velocity[0] *= -1
@@ -91,6 +103,13 @@ class Ball:
         self.velocity += (acf - aci) * collision
         ball.set_velocity(ball.get_velocity() + (bcf - bci) * collision)
 
+    def update_tracker(self):
+        if len(self.tracker) == self.MAX_POINTS_TO_TRACK:
+            self.tracker.insert(0, copy.deepcopy(self.position))
+            del self.tracker[-1]
+        else:
+            self.tracker.append(copy.deepcopy(self.position))
+
     def get_mass(self):
         """ It returns the mass of the ball.
         """
@@ -102,7 +121,7 @@ class Ball:
 
     def get_position(self):
         return self.position
-    
+
     def set_position(self, pos):
         self.position = Vector2(pos[0], pos[1])
 

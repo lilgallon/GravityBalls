@@ -59,6 +59,7 @@ def main():
             balls[i].update(*screen.get_size())
             balls[i].draw(screen)
             balls[i].draw_vec(screen, size=3)
+            balls[i].draw_tracker(screen)
 
         # pygame.display.flip()
         pygame.display.update()
