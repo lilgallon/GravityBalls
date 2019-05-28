@@ -1,15 +1,4 @@
 # GravityBalls
-
-
-**CTRL+R**:
-- <short description> -\> short description
-- CHANGELOG.md -\> url to CHANGELOG.md
-- <licensename> -\> license name
-**Utility**:
-- https://choosealicense.com/
-- https://getemoji.com/
-
-# GravityBalls
 ![Latest release](https://img.shields.io/github/release/N3ROO/GravityBalls.svg)
 ![opissues](https://img.shields.io/github/issues/N3ROO/GravityBalls.svg) 
 ![clissues](https://img.shields.io/github/issues-closed/N3ROO/GravityBalls.svg)
